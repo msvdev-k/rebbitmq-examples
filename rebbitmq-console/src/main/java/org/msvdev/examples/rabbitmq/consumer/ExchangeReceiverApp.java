@@ -1,17 +1,14 @@
-package rabbitmq.consumer;
+package org.msvdev.examples.rabbitmq.consumer;
 
-import com.rabbitmq.client.Channel;
-import com.rabbitmq.client.Connection;
-import com.rabbitmq.client.ConnectionFactory;
-import com.rabbitmq.client.DeliverCallback;
+import com.rabbitmq.client.*;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.TimeoutException;
 
-public class SimpleReceiverApp {
+public class ExchangeReceiverApp {
 
-    private final static String QUEUE_NAME = "SimpleReceiverQueue";
+    private final static String EXCHANGER_NAME = "DirectExchanger";
 
 
     public static void main(String[] args) throws IOException, TimeoutException {
@@ -22,17 +19,23 @@ public class SimpleReceiverApp {
         Connection connection = factory.newConnection();
         Channel channel = connection.createChannel();
 
-        // Создание очереди
-        channel.queueDeclare(QUEUE_NAME, false, false, false, null);
+        // Определение обменника
+        channel.exchangeDeclare(EXCHANGER_NAME, BuiltinExchangeType.DIRECT);
+
+        // Создание и получение имени временной очереди, связанной с соединением
+        String queueName = channel.queueDeclare().getQueue();
+        System.out.printf("My queue name: %s\n", queueName);
+
+        // Привязка временной очереди к обменнику. Ключ: "php"
+        channel.queueBind(queueName, EXCHANGER_NAME, "php");
         System.out.println("[*] Waiting for message...");
 
         DeliverCallback deliverCallback = (consumerTag, delivery) -> {
             String message = new String(delivery.getBody(), StandardCharsets.UTF_8);
             System.out.printf("[x] Received '%s'\n", message);
-            System.out.printf("[.] Thread: %s\n", Thread.currentThread().getName());
         };
 
         // Прослушивание сообщений, поступающих в очередь
-        channel.basicConsume(QUEUE_NAME, true, deliverCallback, consumerTag -> {});
+        channel.basicConsume(queueName, true, deliverCallback, consumerTag -> {});
     }
 }

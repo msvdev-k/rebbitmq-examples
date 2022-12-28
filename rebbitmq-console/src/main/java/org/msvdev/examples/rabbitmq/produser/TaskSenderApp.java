@@ -1,4 +1,4 @@
-package rabbitmq.produser;
+package org.msvdev.examples.rabbitmq.produser;
 
 import com.rabbitmq.client.*;
 

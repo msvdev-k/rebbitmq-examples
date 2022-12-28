@@ -1,4 +1,4 @@
-package rabbitmq.consumer;
+package org.msvdev.examples.rabbitmq.consumer;
 
 import com.rabbitmq.client.*;
 
@@ -6,9 +6,9 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.TimeoutException;
 
-public class ExchangeReceiverApp {
+public class DoubleDirectReceiverApp {
 
-    private final static String EXCHANGER_NAME = "DirectExchanger";
+    private final static String EXCHANGER_NAME = "DoubleDirectExchanger";
 
 
     public static void main(String[] args) throws IOException, TimeoutException {
@@ -26,13 +26,15 @@ public class ExchangeReceiverApp {
         String queueName = channel.queueDeclare().getQueue();
         System.out.printf("My queue name: %s\n", queueName);
 
-        // Привязка временной очереди к обменнику. Ключ: "php"
+        // Привязка временной очереди к обменнику. Ключи: "php" и "java"
         channel.queueBind(queueName, EXCHANGER_NAME, "php");
+        channel.queueBind(queueName, EXCHANGER_NAME, "java");
         System.out.println("[*] Waiting for message...");
 
         DeliverCallback deliverCallback = (consumerTag, delivery) -> {
             String message = new String(delivery.getBody(), StandardCharsets.UTF_8);
             System.out.printf("[x] Received '%s'\n", message);
+            System.out.printf("[.] Thread: %s\n", Thread.currentThread().getName());
         };
 
         // Прослушивание сообщений, поступающих в очередь

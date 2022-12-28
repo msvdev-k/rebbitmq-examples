@@ -1,4 +1,4 @@
-package rabbitmq.consumer;
+package org.msvdev.examples.rabbitmq.consumer;
 
 import com.rabbitmq.client.*;
 

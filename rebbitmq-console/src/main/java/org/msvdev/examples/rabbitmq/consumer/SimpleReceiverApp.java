@@ -1,14 +1,17 @@
-package rabbitmq.consumer;
+package org.msvdev.examples.rabbitmq.consumer;
 
-import com.rabbitmq.client.*;
+import com.rabbitmq.client.Channel;
+import com.rabbitmq.client.Connection;
+import com.rabbitmq.client.ConnectionFactory;
+import com.rabbitmq.client.DeliverCallback;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.TimeoutException;
 
-public class DoubleDirectReceiverApp {
+public class SimpleReceiverApp {
 
-    private final static String EXCHANGER_NAME = "DoubleDirectExchanger";
+    private final static String QUEUE_NAME = "SimpleReceiverQueue";
 
 
     public static void main(String[] args) throws IOException, TimeoutException {
@@ -19,16 +22,8 @@ public class DoubleDirectReceiverApp {
         Connection connection = factory.newConnection();
         Channel channel = connection.createChannel();
 
-        // Определение обменника
-        channel.exchangeDeclare(EXCHANGER_NAME, BuiltinExchangeType.DIRECT);
-
-        // Создание и получение имени временной очереди, связанной с соединением
-        String queueName = channel.queueDeclare().getQueue();
-        System.out.printf("My queue name: %s\n", queueName);
-
-        // Привязка временной очереди к обменнику. Ключи: "php" и "java"
-        channel.queueBind(queueName, EXCHANGER_NAME, "php");
-        channel.queueBind(queueName, EXCHANGER_NAME, "java");
+        // Создание очереди
+        channel.queueDeclare(QUEUE_NAME, false, false, false, null);
         System.out.println("[*] Waiting for message...");
 
         DeliverCallback deliverCallback = (consumerTag, delivery) -> {
@@ -38,6 +33,6 @@ public class DoubleDirectReceiverApp {
         };
 
         // Прослушивание сообщений, поступающих в очередь
-        channel.basicConsume(queueName, true, deliverCallback, consumerTag -> {});
+        channel.basicConsume(QUEUE_NAME, true, deliverCallback, consumerTag -> {});
     }
 }

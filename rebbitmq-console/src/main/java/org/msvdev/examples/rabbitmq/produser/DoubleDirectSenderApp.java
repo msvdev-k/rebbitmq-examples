@@ -1,4 +1,4 @@
-package rabbitmq.produser;
+package org.msvdev.examples.rabbitmq.produser;
 
 import com.rabbitmq.client.BuiltinExchangeType;
 import com.rabbitmq.client.Channel;
@@ -9,9 +9,9 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.TimeoutException;
 
-public class ExchangeSenderApp {
+public class DoubleDirectSenderApp {
 
-    private final static String EXCHANGER_NAME = "directExchanger";
+    private final static String EXCHANGER_NAME = "DoubleDirectExchanger";
 
 
     public static void main(String[] args) throws IOException, TimeoutException {
@@ -25,12 +25,16 @@ public class ExchangeSenderApp {
             // Определение обменника
             channel.exchangeDeclare(EXCHANGER_NAME, BuiltinExchangeType.DIRECT);
 
-            String message = "Hello MSV!";
+            // Отправка сообщения в обменник с ключём "java"
+            channel.basicPublish(EXCHANGER_NAME, "java", null, "java msg".getBytes(StandardCharsets.UTF_8));
+
+            // Отправка сообщения в обменник с ключём "с++"
+            channel.basicPublish(EXCHANGER_NAME, "c++", null, "c++ msg".getBytes(StandardCharsets.UTF_8));
 
             // Отправка сообщения в обменник с ключём "php"
-            channel.basicPublish(EXCHANGER_NAME, "php", null, message.getBytes(StandardCharsets.UTF_8));
-            System.out.printf("[x] Sent message: %s\n", message);
+            channel.basicPublish(EXCHANGER_NAME, "php", null, "php msg".getBytes(StandardCharsets.UTF_8));
 
+            System.out.println("OK");
         }
     }
 }
